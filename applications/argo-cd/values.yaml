@@ -1,0 +1,101 @@
+argo-cd:
+  global:
+    addPrometheusAnnotations: true
+
+  crds:
+    install: true
+
+  dex:
+    # required to use oidc with authentik on k8s
+    enabled: true
+
+  server:
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    extraArgs:
+      - --enable-gzip
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hostname: argo-cd.trial.studio
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    replicas: 1
+
+  redis:
+    enabled: true
+  redis-ha:
+    enabled: false
+
+  repoServer:
+    replicas: 1
+
+  controller:
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+    enableStatefulSet: true
+
+  configs:
+    rbac:
+      create: true
+      annotations: {}
+      policy.default: ''
+      policy.csv: |
+        g, site-reliability-engineer, role:admin
+        g, developer, role:readonly
+      scopes: "[groups]"
+
+    params:
+      applicationsetcontroller.policy: create-update
+      applicationsetcontroller.enable.policy.override: true
+
+    cm:
+      create: true
+      exec.enabled: true
+      url: https://argo-cd.trial.studio
+      admin.enabled: "true"
+      users.anonymous.enabled: "false"
+      users.session.duration: "8h"
+      jsonnet.enabled: "false"
+      help.chatUrl: "https://mycorp.slack.com/argo-cd"
+      help.chatText: "Chat now!"
+      oidc.tls.insecure.skip.verify: "false"
+      helm.valuesFileSchemes: ""
+
+      resource.exclusions: |
+        - apiGroups:
+            - cilium.io
+          kinds:
+            - CiliumIdentity
+          clusters:
+            - "*"
+
+      dex.config: |
+        connectors:
+          - config:
+              issuer: $argo-cd:oidc-url
+              clientID: $argo-cd:oidc-id
+              clientSecret: $argo-cd:oidc-secret
+              insecureEnableGroups: true
+              scopes:
+                - openid
+                - profile
+                - email
+                - groups
+            name: authentik
+            type: oidc
+            id: authentik
+#      oidc.config: |
+#        name: authentik
+#        issuer: $argo-cd:oidc-url
+#        clientID: $argo-cd:oidc-id
+#        clientSecret: $argo-cd:oidc-secret
+#        requestedScopes: ["openid", "profile", "email", "groups"]
+#        requestedIDTokenClaims: {"groups": {"essential": true}}

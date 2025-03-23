@@ -1,0 +1,58 @@
+{{ if .Capabilities.APIVersions.Has "argoproj.io/v1alpha1" -}}
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: system-application-set
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+    applicationsSync: create-update
+  generators:
+    - git:
+        repoURL: &repo git@github.com:random-builds/k8s-cluster.git
+        revision: HEAD
+        directories:
+          - path: "applications/*"
+  template:
+    metadata:
+      name: "{{`{{ path.basename }}`}}"
+      namespace: argo-cd
+{{/*      finalizers:*/}}
+{{/*        - resources-finalizer.argocd.argoproj.io*/}}
+    spec:
+      project: default
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: "{{`{{ path[1] }}`}}"
+      source:
+        repoURL: *repo
+        targetRevision: HEAD
+        path: "{{`{{ path }}`}}"
+      ignoreDifferences:
+        - kind: CustomResourceDefinition
+          group: apiextensions.k8s.io
+          jqPathExpressions:
+            - .spec.conversion.webhook.clientConfig.caBundle
+        - kind: Secret
+          group: ""
+          namespace: certificates
+          name: route53-credentials
+          jqPathExpressions:
+            - .data
+      syncPolicy:
+        automated:
+          selfHeal: false
+          allowEmpty: false
+          prune: false
+        syncOptions:
+          - FailOnSharedResource=true
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - RespectIgnoreDifferences=true
+        retry:
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 3m0s
+          limit: 3
+{{ end }}
