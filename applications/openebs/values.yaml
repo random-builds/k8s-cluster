@@ -1,3 +1,6 @@
 openebs:
   jiva:
     enabled: false
+  localpv-provisioner:
+    localpv:
+      basePath: /var/local-mount
