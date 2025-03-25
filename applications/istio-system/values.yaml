@@ -2,3 +2,5 @@ istiod:
   profile: ambient
 cni:
   profile: ambient
+ztunnel:
+  resourceName: ztunnel
