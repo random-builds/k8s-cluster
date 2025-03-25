@@ -33,6 +33,10 @@ spec:
           group: apiextensions.k8s.io
           jqPathExpressions:
             - .spec.conversion.webhook.clientConfig.caBundle
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          jqPathExpressions:
+            - .webhooks[].failurePolicy
         - kind: Secret
           group: ""
           namespace: certificates
