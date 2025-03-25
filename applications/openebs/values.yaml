@@ -1,4 +1,3 @@
 openebs:
   localprovisioner:
-    hostpathClass:
-      basePath: /var/local-mount
+    basePath: /var/local-mount
