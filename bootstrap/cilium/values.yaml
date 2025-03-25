@@ -51,3 +51,7 @@ cilium:
     enabled: true
     enableAlpn: true
     enableAppProtocol: true
+
+  # for istio integration
+  cni:
+    exclusive: false
