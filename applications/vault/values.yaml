@@ -14,6 +14,8 @@ vault:
     enabled: false
 
   server:
+    image:
+      tag: 1.19.0
     enabled: true
     logLevel: debug
     logFormat: standard
