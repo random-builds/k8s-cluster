@@ -4,3 +4,5 @@ cni:
   profile: ambient
 ztunnel:
   resourceName: ztunnel
+gateway:
+  name: gateway
