@@ -80,10 +80,10 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 100Gi
+            storage: 80Gi
         storageClassName: openebs-hostpath
       status: {}
-    volumesPerServer: 1
+    volumesPerServer: 2
   priorityClassName: ""
   requestAutoCert: false
   serviceAccountName: ""
