@@ -18,9 +18,9 @@ spec:
             region: us-east-2
             hostedZoneID: Z06285332QCWSWF1RDQBK
             accessKeyIDSecretRef:
-              name: cert-manager
+              name: cert-manager-vault-secret
               key: access-key
             secretAccessKeySecretRef:
-              name: cert-manager
+              name: cert-manager-vault-secret
               key: secret-key
 {{ end }}
