@@ -19,8 +19,8 @@ spec:
             hostedZoneID: Z06285332QCWSWF1RDQBK
             accessKeyIDSecretRef:
               name: cert-manager-vault-secret
-              key: access-key
+              key: access_key
             secretAccessKeySecretRef:
               name: cert-manager-vault-secret
-              key: secret-key
+              key: secret_key
 {{ end }}
