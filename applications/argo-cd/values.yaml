@@ -76,6 +76,12 @@ argo-cd:
             - CiliumIdentity
           clusters:
             - "*"
+        - apiGroups:
+            - actions.github.com/v1alpha1
+          kinds:
+            - AutoscalingListener
+          clusters:
+            - "*"
 
       dex.config: |
         connectors:
