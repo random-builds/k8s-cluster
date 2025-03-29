@@ -1,0 +1,5 @@
+actions-runner-controller:
+  scope:
+    singleNamespace: true
+  authSecret:
+    name: gh-arc-vault-secret
