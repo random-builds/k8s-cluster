@@ -8,4 +8,4 @@ kube-prometheus-stack:
       tls:
         - secretName: grafana-cm-tls
           hosts:
-            grafana.trial.studio
+            - grafana.trial.studio
