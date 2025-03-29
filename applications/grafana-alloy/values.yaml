@@ -73,6 +73,11 @@ daemonset:
           forward_to = [loki.write.loki.receiver]
         }
 
+        loki.source.kubernetes "pods" {
+          targets    = discovery.kubernetes.pods.targets
+          forward_to = [loki.write.local.receiver]
+        }
+        
         loki.write "loki" {
           endpoint {
             url = "http://loki-gateway.loki/loki/api/v1/push"
