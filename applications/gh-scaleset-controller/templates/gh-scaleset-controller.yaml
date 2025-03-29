@@ -3,13 +3,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: gh-arc-gha-rs-controller
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller
+  namespace: gh-scaleset-controller
   labels:
     helm.sh/chart: gha-rs-controller-0.11.0
     app.kubernetes.io/name: gha-rs-controller
-    app.kubernetes.io/namespace: gh-arc
-    app.kubernetes.io/instance: gh-arc
+    app.kubernetes.io/namespace: gh-scaleset-controller
+    app.kubernetes.io/instance: gh-scaleset-controller
     app.kubernetes.io/version: "0.11.0"
     app.kubernetes.io/part-of: gha-rs-controller
     app.kubernetes.io/managed-by: Helm
@@ -18,7 +18,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: gh-arc-gha-rs-controller
+  name: gh-scaleset-controller-gha-rs-controller
 rules:
 - apiGroups:
   - actions.github.com
@@ -162,22 +162,22 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: gh-arc-gha-rs-controller
+  name: gh-scaleset-controller-gha-rs-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: gh-arc-gha-rs-controller
+  name: gh-scaleset-controller-gha-rs-controller
 subjects:
 - kind: ServiceAccount
-  name: gh-arc-gha-rs-controller
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller
+  namespace: gh-scaleset-controller
 ---
 # Source: gha-runner-scale-set-controller/templates/manager_listener_role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: gh-arc-gha-rs-controller-listener
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller-listener
+  namespace: gh-scaleset-controller
 rules:
 - apiGroups:
   - ""
@@ -218,40 +218,40 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: gh-arc-gha-rs-controller-listener
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller-listener
+  namespace: gh-scaleset-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: gh-arc-gha-rs-controller-listener
+  name: gh-scaleset-controller-gha-rs-controller-listener
 subjects:
 - kind: ServiceAccount
-  name: gh-arc-gha-rs-controller
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller
+  namespace: gh-scaleset-controller
 ---
 # Source: gha-runner-scale-set-controller/templates/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gh-arc-gha-rs-controller
-  namespace: gh-arc
+  name: gh-scaleset-controller-gha-rs-controller
+  namespace: gh-scaleset-controller
   labels:
     helm.sh/chart: gha-rs-controller-0.11.0
     app.kubernetes.io/name: gha-rs-controller
-    app.kubernetes.io/namespace: gh-arc
-    app.kubernetes.io/instance: gh-arc
+    app.kubernetes.io/namespace: gh-scaleset-controller
+    app.kubernetes.io/instance: gh-scaleset-controller
     app.kubernetes.io/version: "0.11.0"
     app.kubernetes.io/part-of: gha-rs-controller
     app.kubernetes.io/managed-by: Helm
-    actions.github.com/controller-service-account-namespace: gh-arc
-    actions.github.com/controller-service-account-name: gh-arc-gha-rs-controller
+    actions.github.com/controller-service-account-namespace: gh-scaleset-controller
+    actions.github.com/controller-service-account-name: gh-scaleset-controller-gha-rs-controller
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: gha-rs-controller
-      app.kubernetes.io/namespace: gh-arc
-      app.kubernetes.io/instance: gh-arc
+      app.kubernetes.io/namespace: gh-scaleset-controller
+      app.kubernetes.io/instance: gh-scaleset-controller
   template:
     metadata:
       annotations:
@@ -261,10 +261,10 @@ spec:
         app.kubernetes.io/component: controller-manager
         app.kubernetes.io/version: 0.11.0
         app.kubernetes.io/name: gha-rs-controller
-        app.kubernetes.io/namespace: gh-arc
-        app.kubernetes.io/instance: gh-arc
+        app.kubernetes.io/namespace: gh-scaleset-controller
+        app.kubernetes.io/instance: gh-scaleset-controller
     spec:
-      serviceAccountName: gh-arc-gha-rs-controller
+      serviceAccountName: gh-scaleset-controller-gha-rs-controller
       containers:
       - name: manager
         image: "ghcr.io/actions/gha-runner-scale-set-controller:0.11.0"
