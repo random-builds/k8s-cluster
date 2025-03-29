@@ -1,0 +1,10 @@
+kube-prometheus-stack:
+  grafana:
+    ingress:
+      enabled: true
+      hosts:
+        - grafana.trial.studio
+      tls:
+        - secretName: grafana-cm-tls
+          hosts:
+            grafana.trial.studio
