@@ -1,0 +1,98 @@
+loki:
+# monolithic - start
+  deploymentMode: SingleBinary
+  singleBinary:
+    replicas: 1
+    persistence:
+      storageClass: openebs-hostpath
+  read:
+    replicas: 0
+  backend:
+    replicas: 0
+  write:
+    replicas: 0
+  lokiCanary:
+    enabled: false
+  test:
+    enabled: false
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: 'filesystem'
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          index:
+            prefix: loki_index_
+            period: 24h
+          object_store: filesystem # we're storing on filesystem so there's no real persistence here.
+          schema: v13
+# monolithic end
+
+
+#  read:
+#    extraArgs:
+#      - '-config.expand-env=true'
+#    extraEnvFrom:
+#      - secretRef:
+#          name: loki-storage
+#    persistence:
+#      storageClass: openebs-hostpath
+#
+#  write:
+#    extraArgs:
+#      - '-config.expand-env=true'
+#    extraEnvFrom:
+#      - secretRef:
+#          name: loki-storage
+#    persistence:
+#      storageClass: openebs-hostpath
+#
+#  backend:
+#    persistence:
+#      storageClass: openebs-hostpath
+#
+#  minio:
+#    enabled: false
+#
+#  monitoring:
+#    serviceMonitor:
+#      enabled: false
+#    selfMonitoring:
+#      enabled: false
+#
+#  test:
+#    enabled: false
+#  lokiCanary:
+#    enabled: false
+#
+#  loki:
+#    auth_enabled: false
+#    storage:
+#      bucketNames:
+#        chunks: loki-chunks
+#        ruler: loki-ruler
+#        admin: loki-admin
+#      type: s3
+#      s3:
+#        endpoint: "${endpoint}"
+#        region: "${s3_region}"
+#        secretAccessKey: "${secret_key}"
+#        accessKeyId: "${access_key}"
+#        s3ForcePathStyle: true
+#    schemaConfig:
+#      configs:
+#        - from: "2023-01-01"
+#          index:
+#            period: 24h
+#            prefix: index_
+#          object_store: s3
+#          schema: v13
+#          store: tsdb
+#    storage_config:
+#      tsdb_shipper:
+#        active_index_directory: /var/loki/tsdb-index
+#        cache_location: /var/loki/tsdb-cache
