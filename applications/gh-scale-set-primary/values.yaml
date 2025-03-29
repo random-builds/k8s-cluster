@@ -429,4 +429,4 @@ namespaceOverride: ""
 #       key: value
 controllerServiceAccount:
   namespace: gh-scale-set-controller
-  name: gh-scale-set-controller
+  name: gh-scale-set-controller-gha-rs-controller
