@@ -1,0 +1,184 @@
+daemonset:
+  alloy:
+    securityContext:
+      privileged: true
+      runAsUser: 0
+    mounts:
+      extra:
+        - name: host
+          mountPath: /host/root
+          readOnly: true
+        - name: sys
+          mountPath: /host/sys
+          readOnly: true
+        - name: proc
+          mountPath: /host/proc
+          readOnly: true
+
+    configMap:
+#      content: |
+#        prometheus.exporter.unix "local" {
+#          rootfs_path = "/host/root"
+#          procfs_path = "/host/proc"
+#          sysfs_path = "/host/sys"
+#        }
+#
+#        prometheus.scrape "unix" {
+#          targets    = prometheus.exporter.unix.local.targets
+#          forward_to = [prometheus.relabel.unix.receiver]
+#          scrape_interval = "15s"
+#        }
+#
+#        prometheus.relabel "unix" {
+#          forward_to = [prometheus.remote_write.mimir.receiver]
+#
+#          rule {
+#            action        = "drop"
+#            source_labels = ["device"]
+#            regex         = "^(cali|lo|tmpfs|shm).*"
+#          }
+#        }
+#
+#        prometheus.remote_write "mimir" {
+#          endpoint {
+#            url = "http://mimir-nginx.mimir/api/v1/push"
+#          }
+#        }
+#
+#        local.file_match "logs" {
+#          path_targets = [
+#            {__path__ = "/host/root/var/log/*.log"},
+#          ]
+#        }
+#
+#        loki.source.file "tmpfiles" {
+#          targets    = local.file_match.logs.targets
+#          forward_to = [loki.write.loki.receiver]
+#        }
+#
+#        loki.write "loki" {
+#          endpoint {
+#            url = "http://loki-gateway.loki/loki/api/v1/push"
+#          }
+#        }
+      content: |
+        local.file_match "logs" {
+          path_targets = [
+            {__path__ = "/host/root/var/log/*.log"},
+          ]
+        }
+  
+        loki.source.file "tmpfiles" {
+          targets    = local.file_match.logs.targets
+          forward_to = [loki.write.loki.receiver]
+        }
+
+        loki.write "loki" {
+          endpoint {
+            url = "http://loki-gateway.loki/loki/api/v1/push"
+          }
+        }
+
+  controller:
+    hostNetwork: true
+    hostPID: true
+    dnsPolicy: ClusterFirstWithHostNet
+    volumes:
+      extra:
+        - name: host
+          hostPath:
+            path: /
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+
+apps:
+  crds:
+    create: false
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+      nginx.ingress.kubernetes.io/enable-cors: "true"
+      nginx.ingress.kubernetes.io/cors-allow-origin: "*,http://localhost:63344"
+      nginx.ingress.kubernetes.io/cors-allow-headers: "X-Forwarded-For,x-faro-session-id,DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+      nginx.ingress.kubernetes.io/cors-expose-headers: "*"
+    hosts:
+      - alloy.trial.studio
+    tls:
+      - hosts:
+          - alloy.trial.studio
+        secretName: alloy-cm-tls
+
+  alloy:
+    extraPorts:
+      - name: "faro"
+        port: 12347
+        targetPort: 12347
+        protocol: "TCP"
+#        appProtocol: "h2c"
+    clustering:
+      enabled: true
+    configMap:
+#      content: |
+#        discovery.kubernetes "pods" {
+#          role = "pod"
+#        }
+#
+#        prometheus.scrape "pods" {
+#          targets    = discovery.kubernetes.pods.targets
+#          forward_to = [prometheus.remote_write.mimir.receiver]
+#        }
+#
+#        prometheus.remote_write "mimir" {
+#          endpoint {
+#            url = "http://mimir-nginx.mimir/api/v1/push"
+#          }
+#        }
+#
+#        loki.source.kubernetes "pods" {
+#          targets    = discovery.kubernetes.pods.targets
+#          forward_to = [loki.write.loki.receiver]
+#        }
+#
+#        loki.write "loki" {
+#          endpoint {
+#            url = "http://loki-gateway.loki/loki/api/v1/push"
+#          }
+#        }
+      content: |
+        faro.receiver "faro" {
+          server {
+            listen_address = "0.0.0.0"
+            cors_allowed_origins = ["http://localhost:63344", "*"]
+          }
+          output {
+            logs   = [loki.write.loki.receiver]
+            traces = [otelcol.exporter.otlp.tempo.input]
+          }
+        }
+        otelcol.exporter.otlp "tempo" {
+          client {
+            endpoint = "tempo.tempo:4317"
+          tls {
+            insecure             = true
+            insecure_skip_verify = true
+          }
+          }
+        }
+        loki.write "loki" {
+          external_labels = {
+            one = "two",
+          }
+          endpoint {
+            url = "http://loki-gateway.loki/loki/api/v1/push"
+          }
+        }
+
+  controller:
+    type: deployment
